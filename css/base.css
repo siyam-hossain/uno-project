@@ -1,0 +1,118 @@
+/* =====================================================
+   base.css — Design tokens, reset, typography
+   FireBot R1 Documentation
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── TOKENS ── */
+:root {
+  --bg-primary:    #0d1117;
+  --bg-secondary:  #161b22;
+  --bg-tertiary:   #1c2333;
+  --bg-card:       #1a2130;
+
+  --border:        #2a3441;
+  --border-light:  #1e2a38;
+
+  --text-primary:  #e8edf3;
+  --text-secondary:#8b9ab0;
+  --text-muted:    #4d5f73;
+
+  --accent:        #39d98a;
+  --accent-dim:    rgba(57,217,138,0.12);
+  --accent-glow:   rgba(57,217,138,0.25);
+
+  --warn:          #f0a030;
+  --warn-dim:      rgba(240,160,48,0.12);
+  --info:          #4d9fff;
+  --info-dim:      rgba(77,159,255,0.12);
+  --tip:           #a57bfa;
+  --tip-dim:       rgba(165,123,250,0.12);
+
+  --code-bg:       #0a0f16;
+  --code-border:   #1e2a38;
+
+  --kw:  #f97fff;
+  --fn:  #79d4f5;
+  --str: #a8e892;
+  --cm:  #4d6680;
+  --pp:  #ffcc70;
+  --num: #f0a030;
+
+  --sidebar-w: 260px;
+  --topbar-h:  54px;
+  --radius:    8px;
+  --radius-lg: 12px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --transition: 0.18s ease;
+}
+
+/* Light theme */
+body.light {
+  --bg-primary:    #f7f9fc;
+  --bg-secondary:  #eef2f7;
+  --bg-tertiary:   #e6ecf4;
+  --bg-card:       #ffffff;
+  --border:        #d0d8e4;
+  --border-light:  #e0e8f0;
+  --text-primary:  #1a2433;
+  --text-secondary:#4a5a70;
+  --text-muted:    #8a9aaa;
+  --accent:        #0fa860;
+  --accent-dim:    rgba(15,168,96,0.10);
+  --code-bg:       #f0f4f8;
+  --code-border:   #d0d8e4;
+  --cm:  #8a9aaa;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 15px; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TYPOGRAPHY ── */
+h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
+
+h1 { font-size: 2.6rem; }
+h2 { font-size: 1.5rem; color: var(--text-primary); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-light); }
+h3 { font-size: 1.1rem; color: var(--text-secondary); margin: 1.5rem 0 0.75rem; }
+
+p { color: var(--text-secondary); margin-bottom: 1rem; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--accent-dim);
+  color: var(--accent);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  border: 1px solid rgba(57,217,138,0.2);
+}
+
+strong { color: var(--text-primary); }
+em { color: var(--text-secondary); font-style: italic; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

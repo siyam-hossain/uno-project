@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FireBot R1 — Documentation</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/syntax.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR NAV -->
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M14 6 C14 6 10 11 10 15 C10 18.3 11.8 20 14 20 C16.2 20 18 18.3 18 15 C18 11 14 6 14 6Z" fill="var(--accent)" opacity="0.9"/>
+          <circle cx="14" cy="15" r="3" fill="var(--bg-primary)"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-name">FireBot R1</span>
+        <span class="logo-version">v1.0.0</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-label">Getting Started</span>
+      <a href="#overview" class="nav-link active">Overview</a>
+      <a href="#hardware" class="nav-link">Hardware Requirements</a>
+      <a href="#wiring" class="nav-link">Wiring Diagram</a>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-label">Firmware</span>
+      <a href="#pin-definitions" class="nav-link">Pin Definitions</a>
+      <a href="#constants" class="nav-link">Constants & Tuning</a>
+      <a href="#setup" class="nav-link">Setup Function</a>
+      <a href="#main-loop" class="nav-link">Main Loop Logic</a>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-label">Subsystems</span>
+      <a href="#motion" class="nav-link">Motion Control</a>
+      <a href="#sensor" class="nav-link">Ultrasonic Sensor</a>
+      <a href="#obstacle" class="nav-link">Obstacle Avoidance</a>
+      <a href="#fire" class="nav-link">Fire Detection</a>
+      <a href="#nozzle" class="nav-link">Nozzle Aiming</a>
+      <a href="#pump" class="nav-link">Pump Control</a>
+    </div>
+
+    <div class="nav-section">
+      <span class="nav-label">Reference</span>
+      <a href="#full-source" class="nav-link">Full Source Code</a>
+      <a href="#serial-output" class="nav-link">Serial Monitor</a>
+    </div>
+  </nav>
+
+  <!-- MOBILE TOPBAR -->
+  <header id="topbar">
+    <button id="menu-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="topbar-title">FireBot R1 Docs</span>
+    <button id="theme-toggle" aria-label="Toggle theme">☀</button>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main id="content">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-badge">Arduino UNO R3</div>
+      <h1 class="hero-title">FireBot R1<br><span>Documentation</span></h1>
+      <p class="hero-sub">An autonomous fire-fighting robot combining real-time flame detection, obstacle avoidance, servo-aimed water delivery, and relay-driven pump control — all on a single Arduino UNO.</p>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-val">3</span><span class="stat-lbl">Flame Sensors</span></div>
+        <div class="stat"><span class="stat-val">2</span><span class="stat-lbl">Servos</span></div>
+        <div class="stat"><span class="stat-val">1</span><span class="stat-lbl">Ultrasonic</span></div>
+        <div class="stat"><span class="stat-val">L298N</span><span class="stat-lbl">Motor Driver</span></div>
+      </div>
+    </section>
+
+    <!-- OVERVIEW -->
+    <section id="overview" class="doc-section">
+      <h2>Overview</h2>
+      <p>FireBot R1 is an autonomous ground vehicle that detects, approaches, and extinguishes small fires. It uses three IR flame sensors arranged left-center-right to triangulate fire direction, an HC-SR04 ultrasonic sensor (mounted on a pan servo) for distance measurement and obstacle avoidance, and a relay-controlled water pump with an aim servo to direct the nozzle.</p>
+
+      <div class="callout callout-info">
+        <strong>How it works:</strong> The robot continuously polls its flame sensors. When fire is detected, it navigates toward the source while avoiding obstacles. Within 15 cm, it stops, aims the nozzle, and activates the pump. If no fire is present, all systems idle.
+      </div>
+
+      <h3>State Machine</h3>
+      <div class="state-diagram" id="state-diagram"></div>
+    </section>
+
+    <!-- HARDWARE -->
+    <section id="hardware" class="doc-section">
+      <h2>Hardware Requirements</h2>
+      <div class="parts-grid">
+        <div class="part-card">
+          <div class="part-icon">🧠</div>
+          <div class="part-info">
+            <strong>Arduino UNO R3</strong>
+            <span>Microcontroller — ATmega328P</span>
+          </div>
+        </div>
+        <div class="part-card">
+          <div class="part-icon">⚙️</div>
+          <div class="part-info">
+            <strong>L298N Motor Driver</strong>
+            <span>Dual H-Bridge, 2A per channel</span>
+          </div>
+        </div>
+        <div class="part-card">
+          <div class="part-icon">🔥</div>
+          <div class="part-info">
+            <strong>IR Flame Sensor ×3</strong>
+            <span>Analog output, 760–1100 nm range</span>
+          </div>
+        </div>
+        <div class="part-card">
+          <div class="part-icon">📡</div>
+          <div class="part-info">
+            <strong>HC-SR04 Ultrasonic</strong>
+            <span>2–400 cm, ±3 mm accuracy</span>
+          </div>
+        </div>
+        <div class="part-card">
+          <div class="part-icon">🔄</div>
+          <div class="part-info">
+            <strong>SG90 Servo ×2</strong>
+            <span>Pan (obstacle scan) + Aim (nozzle)</span>
+          </div>
+        </div>
+        <div class="part-card">
+          <div class="part-icon">💧</div>
+          <div class="part-info">
+            <strong>Mini Water Pump + Relay</strong>
+            <span>5V pump, active-low relay module</span>
+          </div>
+        </div>
+        <div class="part-card">
+          <div class="part-icon">🚗</div>
+          <div class="part-info">
+            <strong>DC Motors ×2 + Chassis</strong>
+            <span>Differential drive, 4WD or 2WD</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WIRING -->
+    <section id="wiring" class="doc-section">
+      <h2>Wiring Diagram</h2>
+      <div class="wiring-table-wrap">
+        <table class="wiring-table">
+          <thead>
+            <tr><th>Component</th><th>Pin/Signal</th><th>Arduino Pin</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Flame Sensor L</td><td>AOUT</td><td class="pin-tag">A0</td><td>Analog read, lower = more flame</td></tr>
+            <tr><td>Flame Sensor C</td><td>AOUT</td><td class="pin-tag">A1</td><td>Center sensor</td></tr>
+            <tr><td>Flame Sensor R</td><td>AOUT</td><td class="pin-tag">A2</td><td>Right sensor</td></tr>
+            <tr><td>HC-SR04</td><td>TRIG</td><td class="pin-tag">D9</td><td>10 µs pulse to trigger</td></tr>
+            <tr><td>HC-SR04</td><td>ECHO</td><td class="pin-tag">D10</td><td>pulseIn response</td></tr>
+            <tr><td>Pan Servo</td><td>Signal</td><td class="pin-tag">D6</td><td>PWM — obstacle scan</td></tr>
+            <tr><td>Aim Servo</td><td>Signal</td><td class="pin-tag">D5</td><td>PWM — nozzle direction</td></tr>
+            <tr><td>L298N</td><td>IN1</td><td class="pin-tag">D2</td><td>Motor A direction</td></tr>
+            <tr><td>L298N</td><td>IN2</td><td class="pin-tag">D4</td><td>Motor A direction</td></tr>
+            <tr><td>L298N</td><td>IN3</td><td class="pin-tag">D7</td><td>Motor B direction</td></tr>
+            <tr><td>L298N</td><td>IN4</td><td class="pin-tag">D8</td><td>Motor B direction</td></tr>
+            <tr><td>L298N</td><td>ENA</td><td class="pin-tag">D11</td><td>PWM speed — Motor A</td></tr>
+            <tr><td>L298N</td><td>ENB</td><td class="pin-tag">D3</td><td>PWM speed — Motor B</td></tr>
+            <tr><td>Relay Module</td><td>IN</td><td class="pin-tag">D12</td><td>Active-LOW by default</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-warn">
+        <strong>Power Note:</strong> Power the L298N and pump from an external battery (7–12V recommended). Connect GND to Arduino GND. Do <em>not</em> power motors from the Arduino 5V rail.
+      </div>
+    </section>
+
+    <!-- PIN DEFINITIONS -->
+    <section id="pin-definitions" class="doc-section">
+      <h2>Pin Definitions</h2>
+      <p>All pin assignments are defined at the top of the sketch as <code>const int</code> constants, making them easy to remap for different chassis configurations.</p>
+      <pre class="code-block"><code><span class="kw">const int</span> FLAME_L = A0;   <span class="cm">// Left flame sensor (analog)</span>
+<span class="kw">const int</span> FLAME_C = A1;   <span class="cm">// Center flame sensor (analog)</span>
+<span class="kw">const int</span> FLAME_R = A2;   <span class="cm">// Right flame sensor (analog)</span>
+
+<span class="kw">const int</span> TRIG     = 9;   <span class="cm">// Ultrasonic trigger</span>
+<span class="kw">const int</span> ECHO     = 10;  <span class="cm">// Ultrasonic echo</span>
+
+<span class="kw">const int</span> SERVO_PAN = 6;  <span class="cm">// Pan servo (obstacle scan)</span>
+<span class="kw">const int</span> SERVO_AIM = 5;  <span class="cm">// Aim servo (nozzle)</span>
+
+<span class="kw">const int</span> IN1 = 2, IN2 = 4, IN3 = 7, IN4 = 8;  <span class="cm">// Motor direction</span>
+<span class="kw">const int</span> ENA = 11, ENB = 3;                    <span class="cm">// Motor PWM speed</span>
+
+<span class="kw">const int</span> PUMP = 12;      <span class="cm">// Relay control pin</span></code></pre>
+    </section>
+
+    <!-- CONSTANTS -->
+    <section id="constants" class="doc-section">
+      <h2>Constants &amp; Tuning</h2>
+      <p>These values control robot behavior and can be tuned without changing any logic.</p>
+      <div class="const-table-wrap">
+        <table class="const-table">
+          <thead>
+            <tr><th>Constant</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>FLAME_THRESH</code></td><td class="val">500</td><td>Analog value below which flame is detected. Lower = sensor closer to flame.</td></tr>
+            <tr><td><code>OBSTACLE_CM</code></td><td class="val">20</td><td>Distance (cm) at which obstacle avoidance triggers.</td></tr>
+            <tr><td><code>EXTINGUISH_CM</code></td><td class="val">15</td><td>Distance (cm) at which robot stops and fires pump.</td></tr>
+            <tr><td><code>SPD</code></td><td class="val">170</td><td>PWM motor speed for forward/backward (0–255).</td></tr>
+            <tr><td><code>TURN_SPD</code></td><td class="val">140</td><td>PWM motor speed during turns.</td></tr>
+            <tr><td><code>BACK_MS</code></td><td class="val">300</td><td>Milliseconds to reverse during obstacle avoidance.</td></tr>
+            <tr><td><code>TURN_MS</code></td><td class="val">550</td><td>Milliseconds to turn during obstacle avoidance.</td></tr>
+            <tr><td><code>RELAY_ACTIVE_LOW</code></td><td class="val">true</td><td>Set <code>true</code> for active-low relay modules (most common). <code>false</code> for active-high.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SETUP -->
+    <section id="setup" class="doc-section">
+      <h2>Setup Function</h2>
+      <p>Runs once on power-on or reset. Initializes all peripherals, centers both servos, and ensures the pump is off before entering the main loop.</p>
+      <pre class="code-block"><code><span class="kw">void</span> <span class="fn">setup</span>() {
+  Serial.<span class="fn">begin</span>(9600);
+
+  <span class="cm">// Motor driver pins</span>
+  <span class="fn">pinMode</span>(IN1, OUTPUT); <span class="fn">pinMode</span>(IN2, OUTPUT);
+  <span class="fn">pinMode</span>(IN3, OUTPUT); <span class="fn">pinMode</span>(IN4, OUTPUT);
+  <span class="fn">pinMode</span>(ENA, OUTPUT); <span class="fn">pinMode</span>(ENB, OUTPUT);
+
+  <span class="cm">// Ultrasonic + pump</span>
+  <span class="fn">pinMode</span>(TRIG, OUTPUT); <span class="fn">pinMode</span>(ECHO, INPUT);
+  <span class="fn">pinMode</span>(PUMP, OUTPUT);
+
+  <span class="fn">pumpOff</span>();               <span class="cm">// Safe state first</span>
+  panServo.<span class="fn">attach</span>(SERVO_PAN);
+  aimServo.<span class="fn">attach</span>(SERVO_AIM);
+  panServo.<span class="fn">write</span>(90);      <span class="cm">// Center pan servo</span>
+  aimServo.<span class="fn">write</span>(90);      <span class="cm">// Center aim servo</span>
+
+  <span class="fn">stopMotors</span>();
+  <span class="fn">delay</span>(1000);
+  Serial.<span class="fn">println</span>(<span class="str">"Fire Fighting Robot Ready"</span>);
+}</code></pre>
+    </section>
+
+    <!-- MAIN LOOP -->
+    <section id="main-loop" class="doc-section">
+      <h2>Main Loop Logic</h2>
+      <p>The loop runs continuously. Each iteration reads all sensors and makes a single navigation/action decision based on a priority chain:</p>
+
+      <div class="priority-list">
+        <div class="priority-item">
+          <span class="priority-num">1</span>
+          <div>
+            <strong>No fire detected</strong>
+            <p>All sensors above <code>FLAME_THRESH</code> → pump off, motors stop, return early.</p>
+          </div>
+        </div>
+        <div class="priority-item">
+          <span class="priority-num">2</span>
+          <div>
+            <strong>Fire detected, within extinguish range</strong>
+            <p>Distance ≤ <code>EXTINGUISH_CM</code> (15 cm) → stop, aim nozzle, pump on.</p>
+          </div>
+        </div>
+        <div class="priority-item">
+          <span class="priority-num">3</span>
+          <div>
+            <strong>Obstacle detected</strong>
+            <p>Distance &lt; <code>OBSTACLE_CM</code> (20 cm) → pump off, run avoidance maneuver.</p>
+          </div>
+        </div>
+        <div class="priority-item">
+          <span class="priority-num">4</span>
+          <div>
+            <strong>Navigate toward fire</strong>
+            <p>Center sensor → forward. Left only → turn left. Right only → turn right. Both sides → forward.</p>
+          </div>
+        </div>
+      </div>
+
+      <pre class="code-block"><code><span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">bool</span> fL = (<span class="fn">analogRead</span>(FLAME_L) &lt; FLAME_THRESH);
+  <span class="kw">bool</span> fC = (<span class="fn">analogRead</span>(FLAME_C) &lt; FLAME_THRESH);
+  <span class="kw">bool</span> fR = (<span class="fn">analogRead</span>(FLAME_R) &lt; FLAME_THRESH);
+  <span class="kw">long</span> distance = <span class="fn">getDistance</span>();
+
+  <span class="kw">if</span> (!fL && !fC && !fR) { <span class="fn">pumpOff</span>(); <span class="fn">stopMotors</span>(); <span class="kw">return</span>; }
+
+  <span class="kw">if</span> (distance &lt;= EXTINGUISH_CM) {
+    <span class="fn">stopMotors</span>(); <span class="fn">aimNozzle</span>(fL, fC, fR); <span class="fn">pumpOn</span>(); <span class="kw">return</span>;
+  }
+
+  <span class="kw">if</span> (distance &lt; OBSTACLE_CM) { <span class="fn">pumpOff</span>(); <span class="fn">avoidObstacle</span>(); <span class="kw">return</span>; }
+
+  <span class="fn">pumpOff</span>();
+  <span class="kw">if</span> (fC || (fL && fR))  <span class="fn">moveForward</span>();
+  <span class="kw">else if</span> (fL)           <span class="fn">turnLeft</span>();
+  <span class="kw">else if</span> (fR)           <span class="fn">turnRight</span>();
+}</code></pre>
+    </section>
+
+    <!-- MOTION -->
+    <section id="motion" class="doc-section">
+      <h2>Motion Control</h2>
+      <p>Uses the L298N dual H-bridge. <code>ENA</code> / <code>ENB</code> accept PWM for speed; <code>IN1–IN4</code> set direction per motor. Forward and backward use <code>SPD</code> (170); turns use <code>TURN_SPD</code> (140) to improve arc tightness.</p>
+      <div class="motor-grid">
+        <div class="motor-card">
+          <div class="motor-label">Forward</div>
+          <table class="truth-table"><tr><th>IN1</th><th>IN2</th><th>IN3</th><th>IN4</th></tr><tr><td class="hi">H</td><td class="lo">L</td><td class="hi">H</td><td class="lo">L</td></tr></table>
+        </div>
+        <div class="motor-card">
+          <div class="motor-label">Backward</div>
+          <table class="truth-table"><tr><th>IN1</th><th>IN2</th><th>IN3</th><th>IN4</th></tr><tr><td class="lo">L</td><td class="hi">H</td><td class="lo">L</td><td class="hi">H</td></tr></table>
+        </div>
+        <div class="motor-card">
+          <div class="motor-label">Turn Left</div>
+          <table class="truth-table"><tr><th>IN1</th><th>IN2</th><th>IN3</th><th>IN4</th></tr><tr><td class="lo">L</td><td class="hi">H</td><td class="hi">H</td><td class="lo">L</td></tr></table>
+        </div>
+        <div class="motor-card">
+          <div class="motor-label">Turn Right</div>
+          <table class="truth-table"><tr><th>IN1</th><th>IN2</th><th>IN3</th><th>IN4</th></tr><tr><td class="hi">H</td><td class="lo">L</td><td class="lo">L</td><td class="hi">H</td></tr></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SENSOR -->
+    <section id="sensor" class="doc-section">
+      <h2>Ultrasonic Sensor</h2>
+      <p>The <code>getDistance()</code> function sends a 10 µs pulse on TRIG and measures the echo duration. Distance is computed as <code>duration / 58</code> (cm). A 25 ms timeout prevents blocking if no echo returns, in which case 999 cm is returned.</p>
+      <pre class="code-block"><code><span class="kw">long</span> <span class="fn">getDistance</span>() {
+  <span class="fn">digitalWrite</span>(TRIG, LOW);  <span class="fn">delayMicroseconds</span>(2);
+  <span class="fn">digitalWrite</span>(TRIG, HIGH); <span class="fn">delayMicroseconds</span>(10);
+  <span class="fn">digitalWrite</span>(TRIG, LOW);
+
+  <span class="kw">long</span> duration = <span class="fn">pulseIn</span>(ECHO, HIGH, 25000);
+  <span class="kw">return</span> (duration == 0) ? 999 : duration / 58;
+}</code></pre>
+      <div class="callout callout-tip">
+        <strong>Formula:</strong> Sound travels ~343 m/s at room temperature. The round-trip distance in cm = (duration in µs) / 58.
+      </div>
+    </section>
+
+    <!-- OBSTACLE -->
+    <section id="obstacle" class="doc-section">
+      <h2>Obstacle Avoidance</h2>
+      <p>When an obstacle is closer than <code>OBSTACLE_CM</code>, the robot executes a 4-step avoidance maneuver using the pan servo to scan left and right before choosing a direction.</p>
+      <div class="steps-list">
+        <div class="step"><span class="step-num">1</span><div><strong>Stop</strong> — halt motors, 150 ms settle.</div></div>
+        <div class="step"><span class="step-num">2</span><div><strong>Scan left</strong> — pan servo to 160°, measure distance.</div></div>
+        <div class="step"><span class="step-num">3</span><div><strong>Scan right</strong> — pan servo to 20°, measure distance. Return to 90°.</div></div>
+        <div class="step"><span class="step-num">4</span><div><strong>Reverse</strong> — back up for <code>BACK_MS</code> ms, then turn toward the clearer side for <code>TURN_MS</code> ms.</div></div>
+      </div>
+    </section>
+
+    <!-- FIRE -->
+    <section id="fire" class="doc-section">
+      <h2>Fire Detection</h2>
+      <p>Three IR flame sensors return analog values (0–1023). A lower value indicates a stronger IR signal — i.e., more flame. The threshold <code>FLAME_THRESH = 500</code> means any reading below 500 is treated as fire detected on that side.</p>
+
+      <div class="sensor-diagram" id="sensor-viz"></div>
+
+      <div class="callout callout-warn">
+        <strong>Sensor Placement:</strong> Mount sensors angled slightly outward at roughly 45° increments for good lateral coverage. Keep them away from direct sunlight, incandescent bulbs, and hot surfaces to avoid false positives.
+      </div>
+    </section>
+
+    <!-- NOZZLE -->
+    <section id="nozzle" class="doc-section">
+      <h2>Nozzle Aiming</h2>
+      <p>The <code>aimNozzle()</code> function positions the aim servo based on which flame sensors are active. This only runs when the robot is within extinguish range.</p>
+      <div class="aim-table-wrap">
+        <table class="const-table">
+          <thead><tr><th>Left</th><th>Center</th><th>Right</th><th>Servo Angle</th></tr></thead>
+          <tbody>
+            <tr><td>—</td><td>✓</td><td>—</td><td class="val">90° (center)</td></tr>
+            <tr><td>✓</td><td>—</td><td>—</td><td class="val">135° (left)</td></tr>
+            <tr><td>—</td><td>—</td><td>✓</td><td class="val">45° (right)</td></tr>
+            <tr><td>✓</td><td>—</td><td>✓</td><td class="val">90° (default)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PUMP -->
+    <section id="pump" class="doc-section">
+      <h2>Pump Control</h2>
+      <p>The pump is driven by a relay module. The <code>RELAY_ACTIVE_LOW</code> flag controls signal polarity — most common relay breakout boards are active-low (writing <code>LOW</code> activates the relay).</p>
+      <pre class="code-block"><code><span class="kw">void</span> <span class="fn">pumpOn</span>() {
+  <span class="kw">if</span> (!pumping) {
+    <span class="fn">digitalWrite</span>(PUMP, RELAY_ACTIVE_LOW ? LOW : HIGH);
+    pumping = <span class="kw">true</span>;
+  }
+}
+
+<span class="kw">void</span> <span class="fn">pumpOff</span>() {
+  <span class="fn">digitalWrite</span>(PUMP, RELAY_ACTIVE_LOW ? HIGH : LOW);
+  pumping = <span class="kw">false</span>;
+}</code></pre>
+      <div class="callout callout-tip">
+        The <code>pumping</code> flag prevents redundant <code>digitalWrite</code> calls on every loop iteration while already pumping, reducing unnecessary state changes.
+      </div>
+    </section>
+
+    <!-- FULL SOURCE -->
+    <section id="full-source" class="doc-section">
+      <h2>Full Source Code</h2>
+      <div class="code-header">
+        <span class="code-filename">FireBot_R1.ino</span>
+        <button class="copy-btn" data-target="full-source-code">Copy</button>
+      </div>
+      <pre class="code-block" id="full-source-code"><code><span class="cm">// FireBot R1 — Autonomous Fire Fighting Robot</span>
+<span class="cm">// Arduino UNO R3</span>
+<span class="cm">// Combines obstacle avoidance + fire extinguishing</span>
+
+<span class="pp">#include &lt;Servo.h&gt;</span>
+
+<span class="kw">const int</span> FLAME_L = A0, FLAME_C = A1, FLAME_R = A2;
+<span class="kw">const int</span> TRIG = 9, ECHO = 10;
+<span class="kw">const int</span> SERVO_PAN = 6, SERVO_AIM = 5;
+<span class="kw">const int</span> IN1=2, IN2=4, IN3=7, IN4=8, ENA=11, ENB=3;
+<span class="kw">const int</span> PUMP = 12;
+
+<span class="kw">const int</span>  FLAME_THRESH    = 500;
+<span class="kw">const int</span>  OBSTACLE_CM     = 20;
+<span class="kw">const int</span>  EXTINGUISH_CM   = 15;
+<span class="kw">const int</span>  SPD             = 170;
+<span class="kw">const int</span>  TURN_SPD        = 140;
+<span class="kw">const unsigned long</span> BACK_MS = 300;
+<span class="kw">const unsigned long</span> TURN_MS = 550;
+<span class="kw">const bool</span> RELAY_ACTIVE_LOW = <span class="kw">true</span>;
+
+Servo panServo, aimServo;
+<span class="kw">bool</span> pumping = <span class="kw">false</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  Serial.<span class="fn">begin</span>(9600);
+  <span class="fn">pinMode</span>(IN1,OUTPUT); <span class="fn">pinMode</span>(IN2,OUTPUT);
+  <span class="fn">pinMode</span>(IN3,OUTPUT); <span class="fn">pinMode</span>(IN4,OUTPUT);
+  <span class="fn">pinMode</span>(ENA,OUTPUT); <span class="fn">pinMode</span>(ENB,OUTPUT);
+  <span class="fn">pinMode</span>(TRIG,OUTPUT); <span class="fn">pinMode</span>(ECHO,INPUT);
+  <span class="fn">pinMode</span>(PUMP,OUTPUT);
+  <span class="fn">pumpOff</span>();
+  panServo.<span class="fn">attach</span>(SERVO_PAN); aimServo.<span class="fn">attach</span>(SERVO_AIM);
+  panServo.<span class="fn">write</span>(90); aimServo.<span class="fn">write</span>(90);
+  <span class="fn">stopMotors</span>();
+  <span class="fn">delay</span>(1000);
+  Serial.<span class="fn">println</span>(<span class="str">"Fire Fighting Robot Ready"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">bool</span> fL=(<span class="fn">analogRead</span>(FLAME_L)&lt;FLAME_THRESH);
+  <span class="kw">bool</span> fC=(<span class="fn">analogRead</span>(FLAME_C)&lt;FLAME_THRESH);
+  <span class="kw">bool</span> fR=(<span class="fn">analogRead</span>(FLAME_R)&lt;FLAME_THRESH);
+  <span class="kw">long</span> d = <span class="fn">getDistance</span>();
+
+  Serial.print(<span class="str">"L:"</span>); Serial.print(<span class="fn">analogRead</span>(FLAME_L));
+  Serial.print(<span class="str">" C:"</span>); Serial.print(<span class="fn">analogRead</span>(FLAME_C));
+  Serial.print(<span class="str">" R:"</span>); Serial.print(<span class="fn">analogRead</span>(FLAME_R));
+  Serial.print(<span class="str">" D:"</span>); Serial.println(d);
+
+  <span class="kw">if</span> (!fL&&!fC&&!fR){ <span class="fn">pumpOff</span>(); <span class="fn">stopMotors</span>(); <span class="kw">return</span>; }
+  <span class="kw">if</span> (d &lt;= EXTINGUISH_CM){ <span class="fn">stopMotors</span>(); <span class="fn">aimNozzle</span>(fL,fC,fR); <span class="fn">pumpOn</span>(); <span class="kw">return</span>; }
+  <span class="kw">if</span> (d &lt; OBSTACLE_CM){ <span class="fn">pumpOff</span>(); <span class="fn">avoidObstacle</span>(); <span class="kw">return</span>; }
+  <span class="fn">pumpOff</span>();
+  <span class="kw">if</span>(fC||(fL&&fR)) <span class="fn">moveForward</span>();
+  <span class="kw">else if</span>(fL) <span class="fn">turnLeft</span>();
+  <span class="kw">else if</span>(fR) <span class="fn">turnRight</span>();
+}
+
+<span class="kw">void</span> <span class="fn">moveForward</span>(){ <span class="fn">analogWrite</span>(ENA,SPD); <span class="fn">analogWrite</span>(ENB,SPD); <span class="fn">digitalWrite</span>(IN1,HIGH); <span class="fn">digitalWrite</span>(IN2,LOW); <span class="fn">digitalWrite</span>(IN3,HIGH); <span class="fn">digitalWrite</span>(IN4,LOW); }
+<span class="kw">void</span> <span class="fn">moveBackward</span>(){ <span class="fn">analogWrite</span>(ENA,SPD); <span class="fn">analogWrite</span>(ENB,SPD); <span class="fn">digitalWrite</span>(IN1,LOW); <span class="fn">digitalWrite</span>(IN2,HIGH); <span class="fn">digitalWrite</span>(IN3,LOW); <span class="fn">digitalWrite</span>(IN4,HIGH); }
+<span class="kw">void</span> <span class="fn">turnLeft</span>(){ <span class="fn">analogWrite</span>(ENA,TURN_SPD); <span class="fn">analogWrite</span>(ENB,TURN_SPD); <span class="fn">digitalWrite</span>(IN1,LOW); <span class="fn">digitalWrite</span>(IN2,HIGH); <span class="fn">digitalWrite</span>(IN3,HIGH); <span class="fn">digitalWrite</span>(IN4,LOW); }
+<span class="kw">void</span> <span class="fn">turnRight</span>(){ <span class="fn">analogWrite</span>(ENA,TURN_SPD); <span class="fn">analogWrite</span>(ENB,TURN_SPD); <span class="fn">digitalWrite</span>(IN1,HIGH); <span class="fn">digitalWrite</span>(IN2,LOW); <span class="fn">digitalWrite</span>(IN3,LOW); <span class="fn">digitalWrite</span>(IN4,HIGH); }
+<span class="kw">void</span> <span class="fn">stopMotors</span>(){ <span class="fn">analogWrite</span>(ENA,0); <span class="fn">analogWrite</span>(ENB,0); <span class="fn">digitalWrite</span>(IN1,LOW); <span class="fn">digitalWrite</span>(IN2,LOW); <span class="fn">digitalWrite</span>(IN3,LOW); <span class="fn">digitalWrite</span>(IN4,LOW); }
+
+<span class="kw">long</span> <span class="fn">getDistance</span>(){ <span class="fn">digitalWrite</span>(TRIG,LOW); <span class="fn">delayMicroseconds</span>(2); <span class="fn">digitalWrite</span>(TRIG,HIGH); <span class="fn">delayMicroseconds</span>(10); <span class="fn">digitalWrite</span>(TRIG,LOW); <span class="kw">long</span> d=<span class="fn">pulseIn</span>(ECHO,HIGH,25000); <span class="kw">return</span> d==0?999:d/58; }
+
+<span class="kw">void</span> <span class="fn">avoidObstacle</span>(){ <span class="fn">stopMotors</span>(); <span class="fn">delay</span>(150); panServo.<span class="fn">write</span>(160); <span class="fn">delay</span>(400); <span class="kw">long</span> lD=<span class="fn">getDistance</span>(); panServo.<span class="fn">write</span>(20); <span class="fn">delay</span>(400); <span class="kw">long</span> rD=<span class="fn">getDistance</span>(); panServo.<span class="fn">write</span>(90); <span class="fn">delay</span>(200); <span class="fn">moveBackward</span>(); <span class="fn">delay</span>(BACK_MS); <span class="fn">stopMotors</span>(); <span class="fn">delay</span>(100); <span class="kw">if</span>(lD>=rD)<span class="fn">turnLeft</span>(); <span class="kw">else</span> <span class="fn">turnRight</span>(); <span class="fn">delay</span>(TURN_MS); <span class="fn">stopMotors</span>(); }
+
+<span class="kw">void</span> <span class="fn">aimNozzle</span>(<span class="kw">bool</span> l,<span class="kw">bool</span> c,<span class="kw">bool</span> r){ aimServo.<span class="fn">write</span>(c?90:(l&&!r)?135:(r&&!l)?45:90); <span class="fn">delay</span>(250); }
+
+<span class="kw">void</span> <span class="fn">pumpOn</span>(){ <span class="kw">if</span>(!pumping){ <span class="fn">digitalWrite</span>(PUMP,RELAY_ACTIVE_LOW?LOW:HIGH); pumping=<span class="kw">true</span>; Serial.<span class="fn">println</span>(<span class="str">"PUMP ON"</span>); } }
+<span class="kw">void</span> <span class="fn">pumpOff</span>(){ <span class="fn">digitalWrite</span>(PUMP,RELAY_ACTIVE_LOW?HIGH:LOW); pumping=<span class="kw">false</span>; }</code></pre>
+    </section>
+
+    <!-- SERIAL -->
+    <section id="serial-output" class="doc-section">
+      <h2>Serial Monitor</h2>
+      <p>Open the Serial Monitor at <strong>9600 baud</strong>. The robot prints sensor readings every loop iteration:</p>
+      <pre class="code-block terminal"><code><span class="cm">// Normal idle output (no fire)</span>
+L:842 C:856 R:831 D:45
+
+<span class="cm">// Fire detected on center sensor</span>
+L:712 C:287 R:695 D:32
+
+<span class="cm">// Within range — pump activates</span>
+L:598 C:201 R:541 D:12
+PUMP ON</code></pre>
+      <p>Values below <code>500</code> on any channel indicate detected flame. <code>D:</code> is distance in centimeters. <code>D:999</code> means no echo returned within the timeout.</p>
+    </section>
+
+
+    <footer class="doc-footer">
+      <p>FireBot R1 Documentation · Arduino UNO R3 · Built with plain HTML, CSS &amp; JS</p>
+    </footer>
+
+  </main>
+
+  <div id="overlay"></div>
+
+  <script src="js/nav.js"></script>
+  <script src="js/diagrams.js"></script>
+  <script src="js/copy.js"></script>
+  <script src="js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+/* =====================================================
+   layout.css — Sidebar, topbar, main content
+   FireBot R1 Documentation
+   ===================================================== */
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
+  transition: transform var(--transition);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  z-index: 1;
+}
+
+.logo-mark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--accent-dim);
+  border-radius: var(--radius);
+  border: 1px solid rgba(57,217,138,0.25);
+}
+
+.logo-text { display: flex; flex-direction: column; }
+.logo-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+.logo-version { font-size: 0.7rem; font-family: var(--font-mono); color: var(--accent); }
+
+.nav-section { padding: 1rem 0.75rem 0.25rem; }
+
+.nav-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.nav-link {
+  display: block;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  transition: all var(--transition);
+  margin-bottom: 1px;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  text-decoration: none;
+}
+
+.nav-link.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+  font-weight: 500;
+}
+
+/* ── TOPBAR (mobile) ── */
+#topbar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  z-index: 200;
+}
+
+.topbar-title { font-size: 0.9rem; font-weight: 600; }
+
+#menu-toggle {
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 4px;
+}
+#menu-toggle span {
+  display: block; width: 20px; height: 2px;
+  background: var(--text-primary); border-radius: 1px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+#theme-toggle {
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  color: var(--text-secondary); border-radius: 6px;
+  padding: 4px 8px; cursor: pointer; font-size: 0.8rem;
+  transition: all var(--transition);
+}
+#theme-toggle:hover { color: var(--text-primary); border-color: var(--accent); }
+
+/* ── MAIN CONTENT ── */
+#content {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+}
+
+/* ── OVERLAY ── */
+#overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  #topbar { display: flex; }
+  #content { margin-left: 0; padding-top: var(--topbar-h); }
+
+  #sidebar {
+    transform: translateX(-100%);
+    top: 0;
+    box-shadow: var(--shadow-md);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #overlay.show { display: block; }
+}
+
+@media (max-width: 640px) {
+  :root { --sidebar-w: 100vw; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.3rem; }
+}
+
+/* ── FOOTER ── */
+.doc-footer {
+  margin-top: 4rem;
+  padding: 2rem 3rem;
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+}
+.doc-footer p { font-size: 0.8rem; color: var(--text-muted); }

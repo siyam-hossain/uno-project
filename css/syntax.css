@@ -1,0 +1,71 @@
+/* =====================================================
+   syntax.css — Code block & syntax highlighting
+   FireBot R1 Documentation
+   ===================================================== */
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  font-size: 0;     /* kills whitespace gaps */
+  line-height: 0;
+}
+
+.code-block code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  white-space: pre;
+  display: block;
+}
+
+/* ── SYNTAX COLORS ── */
+.code-block .kw  { color: var(--kw);  font-weight: 500; }
+.code-block .fn  { color: var(--fn); }
+.code-block .str { color: var(--str); }
+.code-block .cm  { color: var(--cm);  font-style: italic; }
+.code-block .pp  { color: var(--pp); }
+.code-block .num { color: var(--num); }
+
+/* ── TERMINAL STYLE ── */
+.code-block.terminal {
+  background: #060b10;
+  border-color: #1a2433;
+  position: relative;
+}
+.code-block.terminal::before {
+  content: '● ● ●';
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: #2a3a4a;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+.code-block.terminal code { color: #7ec8a0; font-size: 0.82rem; line-height: 1.75; }
+.code-block.terminal .cm  { color: #2e4a3a; }
+
+/* ── INLINE code (in p/td) reset ── */
+p code, td code, li code, .callout code {
+  font-size: 0.82em;
+  line-height: inherit;
+}
+
+/* Light mode overrides */
+body.light .code-block { background: #f0f4f8; border-color: #d0d8e4; }
+body.light .code-block code { color: #3a4a5a; }
+body.light .code-block .kw  { color: #a040b0; }
+body.light .code-block .fn  { color: #0070c0; }
+body.light .code-block .str { color: #2a8a3a; }
+body.light .code-block .cm  { color: #8a9aaa; }
+body.light .code-block .pp  { color: #b06000; }
+body.light .code-block.terminal { background: #1a2433; }
+body.light .code-block.terminal code { color: #7ec8a0; }
